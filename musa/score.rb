@@ -4,18 +4,26 @@ include Musa::Series
 
 puts "Score loaded: file loaded"
 
-def sample device, slice, start, finish, *labels
-	@sample ||= {}
-	@sample[device] ||= {}
-	@sample[device][slice] = ((finish - start) / 96000.0) / 60.0
-
-	@labels ||= {}
-	@labels[device] ||= {}
-	@labels[device][slice] = labels
+class Sample
+	attr_reader :device, :slice, :length, :labels, :keyvalues
+	
+	def initialize device, slice, start, finish, *labels, **keyvalues
+		@device = device
+		@slice = slice
+		@length = ((finish - start) / 96000.0) / 60.0
+		@labels = labels
+		@keyvalues = keyvalues
+	end
+	
+	def bars
+		@length * @@barspm
+	end
 end
 
-def bars_of device, slice
-	@sample[device][slice] * @@barspm if @sample[device][slice]
+
+def sample device, slice, start, finish, *labels, **keyvalues
+	@samples ||= []
+	@samples << Sample.new(device, slice, start, finish, *labels, **keyvalues)
 end
 
 def definition
