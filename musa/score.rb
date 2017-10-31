@@ -116,7 +116,7 @@ def score s, voices
 
 			puts "pitch = #{pitch}"
 
-			if pitch
+			if pitch < 4
 				voices.voice(0).note pitch: pitch, duration: 1
 
 				wait Rational(30, 96) do
