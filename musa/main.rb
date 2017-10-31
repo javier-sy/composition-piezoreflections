@@ -1,6 +1,7 @@
 require 'musa-dsl'
 
-input = UniMIDI::Input.all.select { |x| x.name == 'Apple Inc. Driver IAC' }[1]
+#input = UniMIDI::Input.all.select { |x| x.name == 'Apple Inc. Driver IAC' }[1]
+input = 96
 output = UniMIDI::Output.all.select { |x| x.name == 'Apple Inc. Driver IAC' }[1]
 
 transport = Musa::Transport.new input, after_stop: ->{ puts "The End!" }
