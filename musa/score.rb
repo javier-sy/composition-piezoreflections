@@ -4,6 +4,9 @@ include Musa::Series
 
 puts "Score loaded: file loaded"
 
+@@bpm = 200
+@@barspm = @@bpm / 4.0
+
 class Sample
 	attr_reader :device, :slice, :length, :labels, :keyvalues
 	
@@ -104,6 +107,9 @@ def definition
 end
 
 def score s, voices
+	
+	definition
+		
 	s.with do
 
 		at 1 do
@@ -116,7 +122,7 @@ def score s, voices
 
 			puts "pitch = #{pitch}"
 
-			if pitch < 4
+			if pitch < 5
 				voices.voice(0).note pitch: pitch, duration: 1
 
 				wait Rational(30, 96) do

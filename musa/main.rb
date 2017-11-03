@@ -1,10 +1,15 @@
 require 'musa-dsl'
+require 'unimidi'
 
-#input = UniMIDI::Input.all.select { |x| x.name == 'Apple Inc. Driver IAC' }[1]
-input = nil
+input = UniMIDI::Input.all.select { |x| x.name == 'Apple Inc. Driver IAC' }[1]
 output = UniMIDI::Output.all.select { |x| x.name == 'Apple Inc. Driver IAC' }[1]
 
-transport = Musa::Transport.new input, after_stop: ->{ puts "The End!" }
+transport = nil
+
+#clock = Musa::InputMidiClock.new input
+clock = Musa::DummyClock.new { transport.sequencer.size > 0 }
+
+transport = Musa::Transport.new clock, after_stop: ->{ puts "The End!" }
 
 voices = Musa::MIDIVoices.new sequencer: transport.sequencer, output: output, channels: [0, 1, 2], log: true
 
