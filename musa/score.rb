@@ -7,7 +7,7 @@ puts "Score loaded: file loaded"
 class Sample
 	attr_reader :device, :slice, :length, :labels, :keyvalues
 	
-	@@bpm = 200
+	@@bpm = 240.0
 	@@barspm = @@bpm / 4.0	
 	
 	def initialize device, slice, finish, start, *labels, **keyvalues
@@ -86,7 +86,7 @@ def definition
  	# Dinámica
  	#
  	samples << Sample.new(4, 1, 1237685, 709113)
- 	samples << Sample.new(4, 2, 5903236, 5396835)
+ 	samples << Sample.new(4, 2, 5903236, 5396835, :base)
  	samples << Sample.new(4, 3, 6312178, 5926215)
  	samples << Sample.new(4, 4, 4364857, 3982056)
  	samples << Sample.new(4, 5, 7634356, 7159061)
@@ -111,12 +111,51 @@ def definition
 end
 
 def score sequencer, voices
+	score_ok sequencer, voices
+end
+
+def score_ok sequencer, voices
 	
-	samples = S(*definition)
-		
+	samples =  S(*definition.select { |s| s.device == 1 }.sort { |a, b| b.bars <=> a.bars } )  \
+		.after(S(*definition.select { |s| s.device == 1 }.sort { |b, a| b.bars <=> a.bars } )) \
+		.after(S(*definition.select { |s| s.device == 2 }.sort { |a, b| b.bars <=> a.bars } )) \
+		.after(S(*definition.select { |s| s.device == 2 }.sort { |b, a| b.bars <=> a.bars } )) \
+		.after(S(*definition.select { |s| s.device == 5 }.sort { |a, b| b.bars <=> a.bars } )) \
+		.after(S(*definition.select { |s| s.device == 5 }.sort { |b, a| b.bars <=> a.bars } )) \
+		.after(S(*definition.select { |s| s.device == 2 }.sort { |a, b| b.bars <=> a.bars } )) \
+		.after(S(*definition.select { |s| s.device == 2 }.sort { |b, a| b.bars <=> a.bars } )) \
+		.after(S(*definition.select { |s| s.device == 1 }.sort { |a, b| b.bars <=> a.bars } )) \
+		.after(S(*definition.select { |s| s.device == 1 }.sort { |b, a| b.bars <=> a.bars } ))
+
+	rythm = S(*definition.select { |s| s.device == 4 && s.labels.include?(:base)}.sort { |a, b| b.bars <=> a.bars } ).repeat
+
+
+	density = RND(false, false, true).repeat
+
 	sequencer.with do
+
+		index = 0
+		ending = false
+
 		at 1 do
-			launch :play
+			launch :rythm
+		end
+
+		on :rythm do
+			index += 1
+			slice = rythm.next_value
+
+			voices.voice(slice.device - 1).note pitch: slice.slice - 1, duration: slice.bars
+
+			if !ending
+				wait slice.bars do
+					launch :rythm
+				end
+			end
+
+			if index == 4
+				launch :play
+			end
 		end
 
 		on :play do
@@ -125,17 +164,20 @@ def score sequencer, voices
 			if slice
 				puts "slice = #{slice}"
 	
-				voices.voice(slice.device - 1).note pitch: slice.slice, duration: slice.bars
+				voices.voice(slice.device - 1).note pitch: slice.slice - 1, duration: slice.bars
 	
 				wait slice.bars * Rational(1, 3) do
-					launch :play
+					launch :play if density.next_value
 				end
 	
 				wait slice.bars * Rational(2, 3) do
-					launch :play
+					launch :play # if density.next_value
 				end
+			else
+				ending = true
 			end
 		end
+
 	end
 end
 
