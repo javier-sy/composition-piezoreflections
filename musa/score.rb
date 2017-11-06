@@ -7,7 +7,7 @@ puts "Score loaded: file loaded"
 class Sample
 	attr_reader :device, :slice, :category, :labels, :keyvalues
 	
-	@@bpm = 240.0
+	@@bpm = 120.0
 	@@barspm = @@bpm / 4.0	
 	
 	def initialize device, slice, finish, start, category, *labels, **keyvalues
@@ -132,11 +132,14 @@ def score_ok sequencer, voices
 	samples = samples.after S(*definition.select { |s| s.category == :hardcore }.sort_by { |s| s.length } )
 
 	samples = samples.after S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length }.reverse )
+
 	samples = samples.after S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length } )
 
 	rythm = S(*definition.select { |s| s.category == :dynamics && s.labels.include?(:base)}.sort_by { |s| s.length }.reverse ).repeat
 
 	transients = S(*definition.select { |s| s.category == :transients }.sort_by { |s| s.length} ).repeat
+
+	fastests = S(*definition.select { |s| s.length < 3 }.sort_by { |s| s.length}.reverse ).repeat(10)
 
 	sequencer.with do
 
@@ -181,44 +184,46 @@ def score_ok sequencer, voices
 			slice = samples.next_value
 			
 			if slice
-				voices.voice(slice.device - 1).note pitch: slice.slice - 1, duration: slice.length
-				sounding += 1
-
-				if slice.length > 2 && slice.length < 2
-				end
-
-				case 
-				when slice.length > 6
-					wait slice.length * Rational(3, 4) do
-						launch :play 
-					end
-					
-					wait slice.length * Rational(1, 4) do
-						launch :transient
-					end
-
-				when slice.length > 4
-					wait slice.length * Rational(2, 4) do
-						launch :play 
-					end
-
-				when slice.length > 2
-					wait slice.length * Rational(1, 4) do
-						launch :play 
-					end
-				
-					wait slice.length * Rational(3, 4) do
-						launch :transient
-					end
-
+				if slice == :now_fastests
+					launch :play_fastests
+					launch :play
 				else
-					wait slice.length do
-						launch :play
-					end
-				end
+					voices.voice(slice.device - 1).note pitch: slice.slice - 1, duration: slice.length
+					sounding += 1
 
-				wait slice.length do
-					sounding -= 1
+					case 
+					when slice.length > 6
+						wait slice.length * Rational(3, 4) do
+							launch :play 
+						end
+						
+						wait slice.length * Rational(1, 4) do
+							launch :transient
+						end
+
+					when slice.length > 4
+						wait slice.length * Rational(2, 4) do
+							launch :play 
+						end
+
+					when slice.length > 2
+						wait slice.length * Rational(1, 4) do
+							launch :play 
+						end
+					
+						wait slice.length * Rational(3, 4) do
+							launch :transient
+						end
+
+					else
+						wait slice.length do
+							launch :play
+						end
+					end
+
+					wait slice.length do
+						sounding -= 1
+					end
 				end
 			else
 				ending = true
