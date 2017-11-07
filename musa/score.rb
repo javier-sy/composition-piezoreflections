@@ -7,7 +7,7 @@ puts "Score loaded: file loaded"
 class Sample
 	attr_reader :device, :slice, :category, :labels, :keyvalues
 	
-	@@bpm = 120.0
+	@@bpm = 180.0
 	@@barspm = @@bpm / 4.0	
 	
 	def initialize device, slice, finish, start, category, *labels, **keyvalues
