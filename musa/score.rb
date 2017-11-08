@@ -121,18 +121,29 @@ def score_ok sequencer, voices
 
 	samples = samples.after S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length }.reverse )
 	samples = samples.after S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length } )
+	samples = samples.after S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length }.reverse )
+	samples = samples.after S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length } )
+	samples = samples.after S(*definition.select { |s| s.category == :continous_and_random_noise }.sort_by { |s| s.length }.reverse )
+	samples = samples.after S(*definition.select { |s| s.category == :continous_and_random_noise }.sort_by { |s| s.length } )
 	samples = samples.after S(*definition.select { |s| s.category == :continous_and_random_noise }.sort_by { |s| s.length }.reverse )
 
 	samples = samples.after S(*definition.select { |s| s.category == :hardcore }.sort_by { |s| s.length } )
 	samples = samples.after S(*definition.select { |s| s.category == :hardcore }.sort_by { |s| s.length }.reverse )
 
 	samples = samples.after S(*definition.select { |s| s.category == :continous_and_random_noise }.sort_by { |s| s.length } )
+	samples = samples.after S(*definition.select { |s| s.category == :continous_and_random_noise }.sort_by { |s| s.length }.reverse )
+	samples = samples.after S(*definition.select { |s| s.category == :continous_and_random_noise }.sort_by { |s| s.length } )
 	samples = samples.after S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length }.reverse )
 
 	samples = samples.after S(*definition.select { |s| s.category == :hardcore }.sort_by { |s| s.length } )
+	samples = samples.after S(*definition.select { |s| s.category == :hardcore }.sort_by { |s| s.length }.reverse )
+	samples = samples.after S(*definition.select { |s| s.category == :hardcore }.sort_by { |s| s.length } )
+	samples = samples.after S(*definition.select { |s| s.category == :hardcore }.sort_by { |s| s.length }.reverse )
+	samples = samples.after S(*definition.select { |s| s.category == :hardcore }.sort_by { |s| s.length } )
 
 	samples = samples.after S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length }.reverse )
-
+	samples = samples.after S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length } )
+	samples = samples.after S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length }.reverse )
 	samples = samples.after S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length } )
 
 	rythm = S(*definition.select { |s| s.category == :dynamics && s.labels.include?(:base)}.sort_by { |s| s.length }.reverse ).repeat
@@ -164,7 +175,7 @@ def score_ok sequencer, voices
 			unless ending && sounding == 0 && counter_end >= 4
 				puts "ending = #{ending} sounding = #{sounding} counter = #{counter} counter_end = #{counter_end}"
 
-				wait slice.length - Rational(1) do
+				wait slice.length * Rational(11, 16) do
 					launch :rythm
 				end
 
@@ -184,46 +195,66 @@ def score_ok sequencer, voices
 			slice = samples.next_value
 			
 			if slice
-				if slice == :now_fastests
-					launch :play_fastests
-					launch :play
-				else
-					voices.voice(slice.device - 1).note pitch: slice.slice - 1, duration: slice.length
-					sounding += 1
+				voices.voice(slice.device - 1).note pitch: slice.slice - 1, duration: slice.length
+				sounding += 1
 
-					case 
-					when slice.length > 6
-						wait slice.length * Rational(3, 4) do
-							launch :play 
-						end
-						
+				case 
+				when slice.length > 7
+					if sounding < 4
 						wait slice.length * Rational(1, 4) do
-							launch :transient
-						end
-
-					when slice.length > 4
-						wait slice.length * Rational(2, 4) do
-							launch :play 
-						end
-
-					when slice.length > 2
-						wait slice.length * Rational(1, 4) do
-							launch :play 
-						end
-					
-						wait slice.length * Rational(3, 4) do
-							launch :transient
-						end
-
-					else
-						wait slice.length do
 							launch :play
 						end
+					else
+						log "Overdrive!!!!"
 					end
 
-					wait slice.length do
-						sounding -= 1
+					wait slice.length * Rational(2, 4) do
+						launch :transient 
 					end
+
+					if sounding < 4
+						wait slice.length * Rational(3, 4) do
+							launch :play 
+						end
+					else
+						log "Overdrive!!!!"
+					end
+		
+				when slice.length > 6
+					wait slice.length * Rational(1, 4) do
+						launch :transient
+					end
+
+					wait slice.length * Rational(3, 4) do
+						launch :play 
+					end
+					
+				when slice.length > 4
+					wait slice.length * Rational(1, 4) do
+						launch :transient
+					end
+
+					wait slice.length * Rational(2, 4) do
+						launch :play 
+					end
+
+				when slice.length > 2
+					wait slice.length * Rational(2, 4) do
+						launch :play 
+					end
+				
+					wait slice.length * Rational(3, 4) do
+						launch :transient
+					end
+
+				else
+					wait slice.length do
+						launch :play
+					end
+				end
+
+				wait slice.length do
+					sounding -= 1
 				end
 			else
 				ending = true
