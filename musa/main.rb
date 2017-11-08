@@ -16,6 +16,7 @@ voices = Musa::MIDIVoices.new sequencer: transport.sequencer, output: output, ch
 transport.before_begin do
 	puts "Begin..."
 	
+	load "./definitions.rb"
 	load "./score.rb"
 
 	score transport.sequencer, voices
