@@ -28,12 +28,18 @@ def score sequencer, voices
 	samples = samples.after S(*definition.select { |s| s.category == :hardcore }.sort_by { |s| s.length }.reverse )
 	samples = samples.after S(*definition.select { |s| s.category == :hardcore }.sort_by { |s| s.length } )
 	samples = samples.after S(*definition.select { |s| s.category == :hardcore }.sort_by { |s| s.length }.reverse )
-	samples = samples.after S(*definition.select { |s| s.category == :hardcore }.sort_by { |s| s.length } )
+
+	samples = samples.after S(0, 1).repeat.select 	S(*definition.select { |s| s.category == :hardcore }.sort_by { |s| s.length } ),
+													S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length } )
 
 	samples = samples.after S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length }.reverse )
 	samples = samples.after S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length } )
-	samples = samples.after S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length }.reverse )
+
+	samples = samples.after S(1, 0).repeat.select 	S(*definition.select { |s| s.category == :hardcore }.sort_by { |s| s.length }.reverse ),
+													S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length }.reverse )
+
 	samples = samples.after S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length } )
+	samples = samples.after S(*definition.select { |s| s.category == :continous }.sort_by { |s| s.length }.reverse )
 
 	rythm = S(*definition.select { |s| s.category == :dynamics && s.labels.include?(:base)}.sort_by { |s| s.length }.reverse ).repeat
 
@@ -83,22 +89,23 @@ def score sequencer, voices
 			
 			if slice
 				voices.voice(slice.device - 1).note pitch: slice.slice - 1, duration: slice.length
+
 				sounding += 1
+
+				wait slice.length do
+					sounding -= 1
+				end
 
 				case 
 				when slice.length > 7
 					log "Slice.length > 7"
 
-					if sounding < 4
-						wait slice.length * Rational(1, 4) do
-							launch :play
-						end
-					else
-						log "Overdrive!!!!"
+					wait slice.length * Rational(1, 4) do
+						launch :transient 
 					end
 
 					wait slice.length * Rational(2, 4) do
-						launch :transient 
+						launch :play
 					end
 
 					if sounding < 4
@@ -148,10 +155,6 @@ def score sequencer, voices
 					wait slice.length do
 						launch :play
 					end
-				end
-
-				wait slice.length do
-					sounding -= 1
 				end
 			else
 				ending = true
