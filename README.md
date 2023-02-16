@@ -1,17 +1,10 @@
 # Piezoreflections
 
-Score for "piezoreflections" musical piece written in Musa-DSL language.
+Score for "Piezoreflections" soud work piece written in Musa-DSL language (started on 2017-09-06).
 
-Can be listened on <https://soundcloud.com/yeste-studio/piezoreflections>
+Listen with headphones on [Piezoreflections](<https://soundcloud.com/yeste-studio/piezoreflections>) SoundCloud page.
 
 uses Musa-DSL v0.3.2
-
-created on 2017-09-06
-
-## TODO
-- migrate to newer MusaDSL version
-- add Live components to repository
- 
 
 # Copyright
 
