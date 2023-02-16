@@ -3,7 +3,8 @@
 .idea
 .bundle
 .rspec
+**/*.asd
 Gemfile.lock
-bin
-p170906 Project
+/bin/
+/p170906 (original wav files) Project/
 
